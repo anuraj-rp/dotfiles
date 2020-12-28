@@ -10,20 +10,28 @@ call vundle#begin()
 " let Vundle manage Vundle plugin. required
 Plugin 'VundleVim/Vundle.vim'
 
-" install the dracula colourscheme plugin
-Plugin 'dracula/vim'
-" install the solarized colorscheme plugin
-Plugin 'altercation/vim-colors-solarized'
-" install the onedark colorscheme plugin
-Plugin 'joshdick/onedark.vim'
+Plugin 'dracula/vim' " install the dracula colourscheme plugin
+Plugin 'altercation/vim-colors-solarized' " install the solarized colorscheme plugin
+Plugin 'joshdick/onedark.vim' " install the onedark colorscheme plugin
 Plugin 'hdima/python-syntax' 
-" install the YouCompleteMe plugin
-Plugin 'Valloric/YouCompleteMe'
-
+"Plugin 'Valloric/YouCompleteMe' " install the YouCompleteMe plugin
+Plugin 'https://github.com/tpope/vim-fugitive.git'
+Plugin 'vim-airline/vim-airline' " Vim statusline
+Plugin 'scrooloose/nerdtree' " File tree explorer
 
 call vundle#end() "required
 filetype plugin indent on "required
 
+"======= Plugin customization start======"
+
+"------- vim-airline --------"
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
+let g:airline#extensions#branch#enabled = 1
+"------- vim-airline --------"
+
+
+"======= Plugin customization end =======" 
 
 call togglebg#map("<F5>")
 
@@ -62,4 +70,3 @@ au BufNewFile,BufRead *.py
 let python_highlight_all=1
 
 filetype on
-
