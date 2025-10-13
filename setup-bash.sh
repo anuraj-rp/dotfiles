@@ -12,6 +12,7 @@ echo ""
 echo "This script will:"
 echo "  1. Install FiraCode Nerd Font"
 echo "  2. Install Starship prompt"
+echo "  3. Configure Gruvbox Rainbow theme with abbreviated paths"
 echo ""
 echo "All installations will be in ~/.local (no sudo required)"
 echo ""
@@ -30,9 +31,15 @@ if [ ! -f "$SCRIPT_DIR/install-starship.sh" ]; then
     exit 1
 fi
 
+if [ ! -f "$SCRIPT_DIR/configure-starship.sh" ]; then
+    echo "Error: configure-starship.sh not found in $SCRIPT_DIR"
+    exit 1
+fi
+
 # Make scripts executable
 chmod +x "$SCRIPT_DIR/install-nerdfonts.sh"
 chmod +x "$SCRIPT_DIR/install-starship.sh"
+chmod +x "$SCRIPT_DIR/configure-starship.sh"
 
 # Run font installation
 echo "========================================="
@@ -53,7 +60,7 @@ echo ""
 
 # Run Starship installation
 echo "========================================="
-echo "Step 2/2: Installing Starship"
+echo "Step 2/3: Installing Starship"
 echo "========================================="
 echo ""
 bash "$SCRIPT_DIR/install-starship.sh"
@@ -61,6 +68,23 @@ bash "$SCRIPT_DIR/install-starship.sh"
 if [ $? -ne 0 ]; then
     echo ""
     echo "Error: Starship installation failed!"
+    exit 1
+fi
+
+echo ""
+read -p "Press Enter to continue with Starship configuration..."
+echo ""
+
+# Run Starship configuration
+echo "========================================="
+echo "Step 3/3: Configuring Starship"
+echo "========================================="
+echo ""
+bash "$SCRIPT_DIR/configure-starship.sh"
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "Error: Starship configuration failed!"
     exit 1
 fi
 
