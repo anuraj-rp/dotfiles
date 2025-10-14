@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Nerd Fonts Installation Script
-# Installs FiraCode Nerd Font to ~/.local without sudo permissions
+# Installs FiraMono Nerd Font to ~/.local without sudo permissions
 
 set -e
 
@@ -19,31 +19,34 @@ mkdir -p "$FONT_DIR"
 
 # Download Nerd Font
 echo ""
-echo "Downloading FiraCode Nerd Font..."
+echo "Downloading FiraMono Nerd Font..."
 cd "$FONT_DIR"
-FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/FiraCode.zip"
+FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/FiraMono.zip"
 
 if command -v curl &> /dev/null; then
-    curl -sL "$FONT_URL" -o FiraCode.zip
+    curl -sL "$FONT_URL" -o FiraMono.zip
 elif command -v wget &> /dev/null; then
-    wget -q "$FONT_URL" -O FiraCode.zip
+    wget -q "$FONT_URL" -O FiraMono.zip
 else
     echo "Error: Neither curl nor wget found. Please install one of them."
     exit 1
 fi
 
 echo "Extracting fonts..."
-unzip -q FiraCode.zip
-rm FiraCode.zip
+unzip -q FiraMono.zip
+rm FiraMono.zip
 
 echo "Updating font cache..."
 fc-cache -fv "$FONT_DIR" > /dev/null 2>&1
 
 echo ""
-echo "✓ FiraCode Nerd Font installed to $FONT_DIR"
+echo "✓ FiraMono Nerd Font installed to $FONT_DIR"
 echo ""
 echo "Font files installed:"
 ls -1 "$FONT_DIR" | grep -i fira | head -5
 echo ""
-echo "Next: Configure your terminal to use 'FiraCode Nerd Font' or 'FiraCode Nerd Font Mono'"
+echo "Next steps:"
+echo "1. Configure your terminal to use 'FiraMono Nerd Font' (monospace variant)"
+echo "2. If using VS Code, restart VS Code completely for the font to be recognized"
+echo "3. Set VS Code terminal font: Settings > Terminal > Font Family > 'FiraMono Nerd Font'"
 echo ""
