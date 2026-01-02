@@ -180,6 +180,17 @@ EOF
             echo "Docker service enabled and started"
         fi
 
+        # Add current user to docker group to run docker without sudo
+        if [ -n "$SUDO_USER" ]; then
+            # Script was run with sudo, add the actual user
+            sudo usermod -aG docker "$SUDO_USER"
+            echo "Added $SUDO_USER to docker group"
+        elif [ "$USER" != "root" ]; then
+            # Script run without sudo by non-root user
+            sudo usermod -aG docker "$USER"
+            echo "Added $USER to docker group"
+        fi
+
         echo "docker installed successfully"
     else
         echo "Error: Unsupported platform. This script supports Ubuntu and macOS only."
@@ -190,8 +201,8 @@ fi
 echo ""
 echo "docker setup complete!"
 echo ""
-echo "To run docker without sudo (Ubuntu only):"
-echo "  sudo usermod -aG docker \$USER && newgrp docker"
+echo "IMPORTANT: Log out and log back in for docker group changes to take effect."
+echo "Or run: newgrp docker (to apply in current session)"
 echo ""
 echo "To verify installation:"
 echo "  docker --version"
