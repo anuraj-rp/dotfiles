@@ -182,15 +182,21 @@ if [ -f "$STARSHIP_CONFIG" ]; then
     echo "✓ Config file already exists at $STARSHIP_CONFIG (keeping existing)"
 else
     echo "Installing Gruvbox Rainbow preset..."
-    STARSHIP_BIN="starship"
-    if [ ! command -v brew &> /dev/null ] && [ -f "$HOME/.local/bin/starship" ]; then
+
+    # Determine starship binary location
+    if command -v brew &> /dev/null; then
+        STARSHIP_BIN="starship"
+    elif [ -f "$HOME/.local/bin/starship" ]; then
         STARSHIP_BIN="$HOME/.local/bin/starship"
+    else
+        STARSHIP_BIN="starship"
     fi
 
-    if "$STARSHIP_BIN" preset gruvbox-rainbow -o "$STARSHIP_CONFIG"; then
+    if "$STARSHIP_BIN" preset gruvbox-rainbow -o "$STARSHIP_CONFIG" 2>/dev/null; then
         echo "✓ Gruvbox Rainbow preset installed to $STARSHIP_CONFIG"
     else
         echo "⚠ Warning: Failed to install preset. Starship will use default configuration"
+        echo "  Run this after reloading shell: starship preset gruvbox-rainbow -o ~/.config/starship.toml"
     fi
 fi
 
