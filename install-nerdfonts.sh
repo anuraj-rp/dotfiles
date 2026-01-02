@@ -1,17 +1,54 @@
 #!/bin/bash
 
 # Nerd Fonts Installation Script
-# Installs FiraMono Nerd Font to ~/.local without sudo permissions
+# Installs FiraMono Nerd Font (Ubuntu and macOS)
 
 set -e
+
+# Clean mode: remove font files
+if [ "$1" == "--clean" ] || [ "$1" == "--clean-all" ]; then
+    echo "Cleaning up FiraMono Nerd Font..."
+
+    if command -v brew &> /dev/null; then
+        # macOS cleanup
+        FONT_DIR="$HOME/Library/Fonts"
+    else
+        # Ubuntu cleanup
+        FONT_DIR="$HOME/.local/share/fonts"
+    fi
+
+    if [ -d "$FONT_DIR" ]; then
+        rm -f "$FONT_DIR"/FiraMono*.ttf "$FONT_DIR"/FiraMono*.otf 2>/dev/null || true
+        echo "Removed FiraMono font files from $FONT_DIR"
+
+        if ! command -v brew &> /dev/null; then
+            fc-cache -fv "$FONT_DIR" > /dev/null 2>&1
+            echo "Updated font cache"
+        fi
+    fi
+
+    echo "Cleanup complete!"
+    exit 0
+fi
 
 echo "========================================"
 echo "Nerd Fonts Installer"
 echo "========================================"
 echo ""
 
-# Define font directory
-FONT_DIR="$HOME/.local/share/fonts"
+# Define font directory based on platform
+if command -v brew &> /dev/null; then
+    # macOS
+    FONT_DIR="$HOME/Library/Fonts"
+    echo "Platform: macOS"
+elif command -v apt &> /dev/null; then
+    # Ubuntu
+    FONT_DIR="$HOME/.local/share/fonts"
+    echo "Platform: Ubuntu"
+else
+    echo "Error: Unsupported platform. This script supports Ubuntu and macOS only."
+    exit 1
+fi
 
 # Create font directory
 echo "Creating font directory..."
@@ -20,7 +57,8 @@ mkdir -p "$FONT_DIR"
 # Download Nerd Font
 echo ""
 echo "Downloading FiraMono Nerd Font..."
-cd "$FONT_DIR"
+TEMP_DIR=$(mktemp -d)
+cd "$TEMP_DIR"
 FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/FiraMono.zip"
 
 if command -v curl &> /dev/null; then
@@ -34,10 +72,16 @@ fi
 
 echo "Extracting fonts..."
 unzip -q FiraMono.zip
-rm FiraMono.zip
+mv *.ttf *.otf "$FONT_DIR/" 2>/dev/null || true
+cd -
+rm -rf "$TEMP_DIR"
 
 echo "Updating font cache..."
-fc-cache -fv "$FONT_DIR" > /dev/null 2>&1
+if command -v brew &> /dev/null; then
+    echo "Font installed to $FONT_DIR (macOS will auto-detect)"
+else
+    fc-cache -fv "$FONT_DIR" > /dev/null 2>&1
+fi
 
 echo ""
 echo "✓ FiraMono Nerd Font installed to $FONT_DIR"
@@ -50,3 +94,6 @@ echo "1. Configure your terminal to use 'FiraMono Nerd Font' (monospace variant)
 echo "2. If using VS Code, restart VS Code completely for the font to be recognized"
 echo "3. Set VS Code terminal font: Settings > Terminal > Font Family > 'FiraMono Nerd Font'"
 echo ""
+echo "To clean up:"
+echo "  $0 --clean      # Remove FiraMono font files"
+echo "  $0 --clean-all  # Remove FiraMono font files"
