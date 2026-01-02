@@ -156,14 +156,21 @@ EOF
         sudo apt-get update
 
         # Install with retry logic for package availability
+        # If default installation fails, try specific containerd.io versions
         if ! sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; then
             echo ""
-            echo "Installation failed. This might be due to package availability issues."
-            echo "Trying with Docker's official installation script instead..."
-            echo ""
-            curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
-            sudo sh /tmp/get-docker.sh
-            rm /tmp/get-docker.sh
+            echo "Installation failed. Trying with specific containerd.io version..."
+
+            # Try version 2.2.0-2 (known stable version)
+            if sudo apt-get install -y containerd.io=2.2.0-2~ubuntu.24.04~noble docker-ce docker-ce-cli docker-buildx-plugin docker-compose-plugin; then
+                echo "Successfully installed Docker with containerd.io 2.2.0-2"
+            # Fallback to version 1.7.29-1 if 2.2.0-2 fails
+            elif sudo apt-get install -y containerd.io=1.7.29-1~ubuntu.24.04~noble docker-ce docker-ce-cli docker-buildx-plugin docker-compose-plugin; then
+                echo "Successfully installed Docker with containerd.io 1.7.29-1"
+            else
+                echo "Error: Failed to install Docker. Please check package availability."
+                exit 1
+            fi
         fi
 
         # Enable and start docker service
