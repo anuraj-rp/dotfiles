@@ -77,8 +77,16 @@ else
 fi
 
 echo "Extracting fonts..."
-unzip -q FiraMono.zip
-mv *.ttf *.otf "$FONT_DIR/" 2>/dev/null || true
+unzip -q FiraMono.zip || { echo "Error: Failed to extract fonts"; exit 1; }
+
+# Move font files (some archives may only have .ttf or only .otf)
+if ls *.ttf 1> /dev/null 2>&1; then
+    mv *.ttf "$FONT_DIR/" 2>/dev/null || true
+fi
+if ls *.otf 1> /dev/null 2>&1; then
+    mv *.otf "$FONT_DIR/" 2>/dev/null || true
+fi
+
 cd - > /dev/null
 rm -rf "$TEMP_DIR"
 
@@ -86,8 +94,13 @@ echo "Updating font cache..."
 if command -v brew &> /dev/null; then
     echo "Font installed to $FONT_DIR (macOS will auto-detect)"
 else
-    fc-cache -fv "$FONT_DIR" > /dev/null 2>&1
-    echo "✓ Font cache updated"
+    if command -v fc-cache &> /dev/null; then
+        fc-cache -fv "$FONT_DIR" > /dev/null 2>&1 || echo "⚠ Warning: fc-cache failed, but fonts are installed"
+        echo "✓ Font cache updated"
+    else
+        echo "⚠ Warning: fc-cache not found, skipping cache update"
+        echo "  Install fontconfig if needed: sudo apt install fontconfig"
+    fi
 fi
 
 echo ""

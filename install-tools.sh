@@ -92,7 +92,8 @@ elif command -v apt &> /dev/null; then
         git \
         iproute2 \
         zip \
-        unzip
+        unzip \
+        fontconfig
 
     echo ""
     echo "✓ All packages installed successfully"
@@ -124,6 +125,7 @@ if command -v brew &> /dev/null; then
 else
     echo "  - iproute2 (ip command)"
     echo "  - zip/unzip (archive utilities)"
+    echo "  - fontconfig (font cache management)"
 fi
 echo ""
 echo "Verify installations:"
