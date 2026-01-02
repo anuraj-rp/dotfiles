@@ -79,7 +79,7 @@ fi
 echo "Extracting fonts..."
 unzip -q FiraMono.zip
 mv *.ttf *.otf "$FONT_DIR/" 2>/dev/null || true
-cd -
+cd - > /dev/null
 rm -rf "$TEMP_DIR"
 
 echo "Updating font cache..."
@@ -87,6 +87,7 @@ if command -v brew &> /dev/null; then
     echo "Font installed to $FONT_DIR (macOS will auto-detect)"
 else
     fc-cache -fv "$FONT_DIR" > /dev/null 2>&1
+    echo "✓ Font cache updated"
 fi
 
 echo ""
