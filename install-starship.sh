@@ -9,21 +9,17 @@ set -e
 if [ "$1" == "--clean" ]; then
     echo "Cleaning up starship shell integration..."
 
-    # Remove from bashrc
-    if [ -f "$HOME/.bashrc" ]; then
-        sed -i.bak '/# Initialize Starship prompt/d' "$HOME/.bashrc"
-        sed -i.bak '/eval "$(starship init bash)"/d' "$HOME/.bashrc"
-        rm -f "$HOME/.bashrc.bak"
-        echo "Removed starship from ~/.bashrc"
-    fi
-
-    # Remove from zshrc
-    if [ -f "$HOME/.zshrc" ]; then
-        sed -i.bak '/# Initialize Starship prompt/d' "$HOME/.zshrc"
-        sed -i.bak '/eval "$(starship init zsh)"/d' "$HOME/.zshrc"
-        rm -f "$HOME/.zshrc.bak"
-        echo "Removed starship from ~/.zshrc"
-    fi
+    # Remove from all shell config files
+    for config in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.profile" "$HOME/.zshrc"; do
+        if [ -f "$config" ]; then
+            sed -i.bak '/# Initialize Starship prompt/d' "$config"
+            sed -i.bak '/eval "$(starship init bash)"/d' "$config"
+            sed -i.bak '/eval "$(starship init zsh)"/d' "$config"
+            sed -i.bak '/starship init/d' "$config"
+            rm -f "${config}.bak"
+            echo "Removed starship from $config"
+        fi
+    done
 
     echo "Cleanup complete! (starship binary still installed)"
     exit 0
@@ -33,24 +29,19 @@ fi
 if [ "$1" == "--clean-all" ]; then
     echo "Completely removing starship..."
 
-    # Remove shell integration
-    if [ -f "$HOME/.bashrc" ]; then
-        sed -i.bak '/# Initialize Starship prompt/d' "$HOME/.bashrc"
-        sed -i.bak '/eval "$(starship init bash)"/d' "$HOME/.bashrc"
-        sed -i.bak '/# Add ~\/.local\/bin to PATH/d' "$HOME/.bashrc"
-        sed -i.bak '/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$HOME/.bashrc"
-        rm -f "$HOME/.bashrc.bak"
-        echo "Removed starship from ~/.bashrc"
-    fi
-
-    if [ -f "$HOME/.zshrc" ]; then
-        sed -i.bak '/# Initialize Starship prompt/d' "$HOME/.zshrc"
-        sed -i.bak '/eval "$(starship init zsh)"/d' "$HOME/.zshrc"
-        sed -i.bak '/# Add ~\/.local\/bin to PATH/d' "$HOME/.zshrc"
-        sed -i.bak '/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$HOME/.zshrc"
-        rm -f "$HOME/.zshrc.bak"
-        echo "Removed starship from ~/.zshrc"
-    fi
+    # Remove shell integration from all shell config files
+    for config in "$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.profile" "$HOME/.zshrc"; do
+        if [ -f "$config" ]; then
+            sed -i.bak '/# Initialize Starship prompt/d' "$config"
+            sed -i.bak '/eval "$(starship init bash)"/d' "$config"
+            sed -i.bak '/eval "$(starship init zsh)"/d' "$config"
+            sed -i.bak '/starship init/d' "$config"
+            sed -i.bak '/# Add ~\/.local\/bin to PATH/d' "$config"
+            sed -i.bak '/export PATH="\$HOME\/.local\/bin:\$PATH"/d' "$config"
+            rm -f "${config}.bak"
+            echo "Removed starship from $config"
+        fi
+    done
 
     if command -v brew &> /dev/null; then
         # macOS uninstall
