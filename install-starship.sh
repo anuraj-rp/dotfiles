@@ -172,6 +172,29 @@ fi
 echo ""
 echo "Configuring shell integration..."
 
+# Ensure .bashrc is sourced from .bash_profile for login shells (SSH)
+if [ -f "$HOME/.bashrc" ]; then
+    if [ -f "$HOME/.bash_profile" ]; then
+        if ! grep -q "source.*\.bashrc" "$HOME/.bash_profile" && ! grep -q "\..*\.bashrc" "$HOME/.bash_profile"; then
+            echo "Adding .bashrc source to .bash_profile for SSH sessions"
+            echo '' >> "$HOME/.bash_profile"
+            echo '# Source .bashrc for interactive shells' >> "$HOME/.bash_profile"
+            echo 'if [ -f ~/.bashrc ]; then' >> "$HOME/.bash_profile"
+            echo '    . ~/.bashrc' >> "$HOME/.bash_profile"
+            echo 'fi' >> "$HOME/.bash_profile"
+        fi
+    elif [ ! -f "$HOME/.bash_profile" ]; then
+        # Create .bash_profile if it doesn't exist
+        echo "Creating .bash_profile to source .bashrc"
+        cat > "$HOME/.bash_profile" <<'PROFILE_EOF'
+# Source .bashrc for interactive shells
+if [ -f ~/.bashrc ]; then
+    . ~/.bashrc
+fi
+PROFILE_EOF
+    fi
+fi
+
 # For Bash
 if [ -f "$HOME/.bashrc" ]; then
     if ! grep -q 'eval "$(starship init bash)"' "$HOME/.bashrc"; then
