@@ -50,6 +50,12 @@ else
     exit 1
 fi
 
+# Check if unzip is available
+if ! command -v unzip &> /dev/null; then
+    echo "Error: unzip is not installed. Please run ./install-tools.sh first."
+    exit 1
+fi
+
 # Create font directory
 echo "Creating font directory..."
 mkdir -p "$FONT_DIR"

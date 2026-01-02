@@ -90,7 +90,9 @@ elif command -v apt &> /dev/null; then
         python3-venv \
         python-is-python3 \
         git \
-        iproute2
+        iproute2 \
+        zip \
+        unzip
 
     echo ""
     echo "✓ All packages installed successfully"
@@ -121,6 +123,7 @@ if command -v brew &> /dev/null; then
     echo "  - iproute2mac (ip command for macOS)"
 else
     echo "  - iproute2 (ip command)"
+    echo "  - zip/unzip (archive utilities)"
 fi
 echo ""
 echo "Verify installations:"

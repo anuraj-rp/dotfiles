@@ -151,12 +151,12 @@ echo -e "${YELLOW}========================================"
 echo "Phase 5: Shell Prompt & Fonts"
 echo -e "========================================${NC}"
 echo ""
-echo -e "${BLUE}[1/2] Installing starship prompt...${NC}"
-"$SCRIPT_DIR/install-starship.sh"
+echo -e "${BLUE}[1/2] Installing nerd fonts...${NC}"
+"$SCRIPT_DIR/install-nerdfonts.sh"
 
 echo ""
-echo -e "${BLUE}[2/2] Installing nerd fonts...${NC}"
-"$SCRIPT_DIR/install-nerdfonts.sh"
+echo -e "${BLUE}[2/2] Installing starship prompt...${NC}"
+"$SCRIPT_DIR/install-starship.sh"
 
 # Final summary
 echo ""
