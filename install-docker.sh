@@ -60,10 +60,15 @@ if [ "$1" == "--clean-all" ]; then
         sudo apt-get autoremove -y
         echo "Uninstalled docker packages"
 
-        # Remove docker repository
+        # Remove docker repository files
+        if [ -f /etc/apt/sources.list.d/docker.sources ]; then
+            sudo rm /etc/apt/sources.list.d/docker.sources
+            echo "Removed docker apt repository (docker.sources)"
+        fi
+
         if [ -f /etc/apt/sources.list.d/docker.list ]; then
             sudo rm /etc/apt/sources.list.d/docker.list
-            echo "Removed docker apt repository"
+            echo "Removed docker apt repository (docker.list)"
         fi
 
         if [ -f /etc/apt/keyrings/docker.asc ]; then
@@ -119,7 +124,8 @@ else
         echo "docker installed successfully"
         echo "Note: You may need to start Docker Desktop manually from Applications"
     elif command -v apt-get &> /dev/null; then
-        # Ubuntu/Debian installation (following official Docker script approach)
+        # Ubuntu/Debian installation (following official Docker documentation)
+        # Reference: https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
         echo "Installing prerequisites..."
         sudo apt-get update
         sudo apt-get install -y ca-certificates curl
@@ -127,20 +133,24 @@ else
         echo "Setting up docker repository..."
         sudo install -m 0755 -d /etc/apt/keyrings
 
-        # Download GPG key with proper error handling
+        # Download Docker's official GPG key
         if [ ! -f /etc/apt/keyrings/docker.asc ]; then
             sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
             sudo chmod a+r /etc/apt/keyrings/docker.asc
             echo "Downloaded Docker GPG key"
         fi
 
-        # Get system information
-        CODENAME=$(. /etc/os-release && echo "$VERSION_CODENAME")
-        ARCH=$(dpkg --print-architecture)
+        # Get system codename (prefer UBUNTU_CODENAME if available)
+        CODENAME=$(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
 
-        # Configure repository
-        echo "deb [arch=${ARCH} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu ${CODENAME} stable" | \
-            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        # Add the repository using DEB822 format (.sources file)
+        sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: ${CODENAME}
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
 
         echo "Installing docker packages..."
         sudo apt-get update
