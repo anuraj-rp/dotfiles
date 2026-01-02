@@ -101,7 +101,24 @@ else
         TEMP_DIR=$(mktemp -d)
         cd "$TEMP_DIR"
         STARSHIP_VERSION="1.19.0"
-        STARSHIP_URL="https://github.com/starship/starship/releases/download/v${STARSHIP_VERSION}/starship-x86_64-unknown-linux-gnu.tar.gz"
+
+        # Detect architecture
+        ARCH=$(uname -m)
+        case "$ARCH" in
+            x86_64)
+                STARSHIP_ARCH="x86_64-unknown-linux-gnu"
+                ;;
+            aarch64|arm64)
+                STARSHIP_ARCH="aarch64-unknown-linux-gnu"
+                ;;
+            *)
+                echo "Error: Unsupported architecture: $ARCH"
+                exit 1
+                ;;
+        esac
+
+        STARSHIP_URL="https://github.com/starship/starship/releases/download/v${STARSHIP_VERSION}/starship-${STARSHIP_ARCH}.tar.gz"
+        echo "Detected architecture: $ARCH (downloading $STARSHIP_ARCH)"
 
         if command -v curl &> /dev/null; then
             curl -sL "$STARSHIP_URL" -o starship.tar.gz
