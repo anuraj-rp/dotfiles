@@ -100,7 +100,9 @@ else
         echo "Downloading Starship..."
         TEMP_DIR=$(mktemp -d)
         cd "$TEMP_DIR"
-        STARSHIP_VERSION="1.19.0"
+
+        # Get latest version from GitHub API
+        STARSHIP_VERSION=$(curl -s https://api.github.com/repos/starship/starship/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")' || echo "v1.24.2")
 
         # Detect architecture
         ARCH=$(uname -m)
@@ -109,7 +111,10 @@ else
                 STARSHIP_ARCH="x86_64-unknown-linux-gnu"
                 ;;
             aarch64|arm64)
-                STARSHIP_ARCH="aarch64-unknown-linux-gnu"
+                STARSHIP_ARCH="aarch64-unknown-linux-musl"
+                ;;
+            armv7l)
+                STARSHIP_ARCH="arm-unknown-linux-musleabihf"
                 ;;
             *)
                 echo "Error: Unsupported architecture: $ARCH"
@@ -117,8 +122,9 @@ else
                 ;;
         esac
 
-        STARSHIP_URL="https://github.com/starship/starship/releases/download/v${STARSHIP_VERSION}/starship-${STARSHIP_ARCH}.tar.gz"
+        STARSHIP_URL="https://github.com/starship/starship/releases/download/${STARSHIP_VERSION}/starship-${STARSHIP_ARCH}.tar.gz"
         echo "Detected architecture: $ARCH (downloading $STARSHIP_ARCH)"
+        echo "Version: $STARSHIP_VERSION"
 
         if command -v curl &> /dev/null; then
             curl -sL "$STARSHIP_URL" -o starship.tar.gz
