@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # install-docker.sh — Install Docker Engine on Ubuntu or macOS
 # Safe to run multiple times.
+# Based on Docker's official installation script: https://get.docker.com
 
 set -e
 
@@ -55,8 +56,8 @@ if [ "$1" == "--clean-all" ]; then
             echo "Disabled docker service"
         fi
 
-        sudo apt remove -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-        sudo apt autoremove -y
+        sudo apt-get remove -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
+        sudo apt-get autoremove -y
         echo "Uninstalled docker packages"
 
         # Remove docker repository
@@ -65,9 +66,14 @@ if [ "$1" == "--clean-all" ]; then
             echo "Removed docker apt repository"
         fi
 
+        if [ -f /etc/apt/keyrings/docker.asc ]; then
+            sudo rm /etc/apt/keyrings/docker.asc
+            echo "Removed docker GPG key (docker.asc)"
+        fi
+
         if [ -f /etc/apt/keyrings/docker.gpg ]; then
             sudo rm /etc/apt/keyrings/docker.gpg
-            echo "Removed docker GPG key"
+            echo "Removed docker GPG key (docker.gpg)"
         fi
 
         # Remove docker data
@@ -75,9 +81,30 @@ if [ "$1" == "--clean-all" ]; then
             sudo rm -rf /var/lib/docker
             echo "Removed docker data directory"
         fi
+
+        if [ -d /var/lib/containerd ]; then
+            sudo rm -rf /var/lib/containerd
+            echo "Removed containerd data directory"
+        fi
     fi
 
     echo "Full uninstall complete!"
+    exit 0
+fi
+
+# Use official Docker script: use this for reliable cross-platform installation
+if [ "$1" == "--official" ]; then
+    echo "Using Docker's official installation script..."
+    curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
+    sudo sh /tmp/get-docker.sh
+    rm /tmp/get-docker.sh
+
+    echo ""
+    echo "docker installed successfully!"
+    echo ""
+    echo "To run docker without sudo:"
+    echo "  sudo usermod -aG docker \$USER && newgrp docker"
+    echo ""
     exit 0
 fi
 
@@ -91,41 +118,51 @@ else
         brew install --cask docker
         echo "docker installed successfully"
         echo "Note: You may need to start Docker Desktop manually from Applications"
-    elif command -v apt &> /dev/null; then
-        # Ubuntu installation
+    elif command -v apt-get &> /dev/null; then
+        # Ubuntu/Debian installation (following official Docker script approach)
         echo "Installing prerequisites..."
-        sudo apt update
-        sudo apt install -y ca-certificates curl gnupg
+        sudo apt-get update
+        sudo apt-get install -y ca-certificates curl
 
         echo "Setting up docker repository..."
         sudo install -m 0755 -d /etc/apt/keyrings
 
-        if [ ! -f /etc/apt/keyrings/docker.gpg ]; then
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-            | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        # Download GPG key with proper error handling
+        if [ ! -f /etc/apt/keyrings/docker.asc ]; then
+            sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+            sudo chmod a+r /etc/apt/keyrings/docker.asc
+            echo "Downloaded Docker GPG key"
         fi
 
-        sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
+        # Get system information
         CODENAME=$(. /etc/os-release && echo "$VERSION_CODENAME")
         ARCH=$(dpkg --print-architecture)
-        REPO_LINE="deb [arch=${ARCH} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${CODENAME} stable"
 
-        LIST_FILE=/etc/apt/sources.list.d/docker.list
-        if [ -f "$LIST_FILE" ]; then
-            CURRENT=$(sudo cat "$LIST_FILE" || true)
-        else
-            CURRENT=""
-        fi
-        if [ "$CURRENT" != "$REPO_LINE" ]; then
-            echo "$REPO_LINE" | sudo tee "$LIST_FILE" > /dev/null
-        fi
-
-        sudo rm -f /etc/apt/sources.list.d/docker.list.save
+        # Configure repository
+        echo "deb [arch=${ARCH} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu ${CODENAME} stable" | \
+            sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
         echo "Installing docker packages..."
-        sudo apt update
-        sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        sudo apt-get update
+
+        # Install with retry logic for package availability
+        if ! sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; then
+            echo ""
+            echo "Installation failed. This might be due to package availability issues."
+            echo "Trying with Docker's official installation script instead..."
+            echo ""
+            curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
+            sudo sh /tmp/get-docker.sh
+            rm /tmp/get-docker.sh
+        fi
+
+        # Enable and start docker service
+        if command -v systemctl &> /dev/null; then
+            sudo systemctl enable docker
+            sudo systemctl start docker
+            echo "Docker service enabled and started"
+        fi
+
         echo "docker installed successfully"
     else
         echo "Error: Unsupported platform. This script supports Ubuntu and macOS only."
@@ -141,7 +178,9 @@ echo "  sudo usermod -aG docker \$USER && newgrp docker"
 echo ""
 echo "To verify installation:"
 echo "  docker --version"
+echo "  docker run hello-world"
 echo ""
 echo "To clean up:"
 echo "  $0 --clean      # Stop and disable service only"
 echo "  $0 --clean-all  # Completely uninstall docker"
+echo "  $0 --official   # Use Docker's official installation script"
