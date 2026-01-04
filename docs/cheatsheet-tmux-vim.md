@@ -26,6 +26,30 @@ The prefix key is `Ctrl+a` (instead of default `Ctrl+b`).
 | Resize pane left | `Ctrl+a h` |
 | Toggle pane zoom (maximize/restore) | `Ctrl+a m` |
 
+### Session Management
+
+| Action | Command |
+|--------|---------|
+| Create new session | `tmux new -s <name>` |
+| List sessions | `tmux ls` |
+| Attach to session | `tmux attach -t <name>` or `tmux a -t <name>` |
+| Detach from session | `Ctrl+a d` |
+| Switch to session | `Ctrl+a s` (interactive list) |
+| Rename session | `Ctrl+a $` |
+| Kill session | `tmux kill-session -t <name>` |
+| Kill all sessions | `tmux kill-server` |
+
+### Window Management
+
+| Action | Keys |
+|--------|------|
+| Create new window | `Ctrl+a c` |
+| Next window | `Ctrl+a n` |
+| Previous window | `Ctrl+a p` |
+| Switch to window # | `Ctrl+a 0-9` |
+| Rename window | `Ctrl+a ,` |
+| Kill window | `Ctrl+a &` |
+
 ### Configuration
 
 | Action | Keys |
@@ -116,15 +140,43 @@ Ctrl+a h/j/k/l
 ### Plugin Management
 
 **Vim (Vundle):**
-```vim
-:PluginInstall    " Install plugins
-:PluginUpdate     " Update plugins
-:PluginClean      " Remove unused plugins
+
+Initial setup:
+```bash
+# Install Vundle plugin manager
+git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 ```
 
-**Tmux (TPM):**
+Plugin commands:
+```vim
+:PluginInstall    " Install plugins listed in .vimrc
+:PluginUpdate     " Update all installed plugins
+:PluginClean      " Remove unused plugins (prompts for confirmation)
+:PluginList       " List configured plugins
+:PluginSearch foo " Search for plugins named 'foo'
+```
+
+**Tmux (TPM - Tmux Plugin Manager):**
+
+Initial setup:
+```bash
+# Install TPM
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+# Reload tmux config
+tmux source ~/.tmux.conf
+```
+
+Plugin commands:
 | Action | Keys |
 |--------|------|
-| Install plugins | `Ctrl+a I` |
-| Update plugins | `Ctrl+a U` |
+| Install plugins | `Ctrl+a I` (capital i) |
+| Update plugins | `Ctrl+a U` (capital u) |
 | Uninstall plugins | `Ctrl+a Alt+u` |
+
+Command-line installation:
+```bash
+# Install/update plugins from command line
+~/.tmux/plugins/tpm/bin/install_plugins
+~/.tmux/plugins/tpm/bin/update_plugins all
+```
