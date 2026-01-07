@@ -52,6 +52,7 @@ id username
 ## Installed Tools
 
 - System tools (build-essential, gdb, python3, git, zip/unzip, fontconfig)
+- Zsh with Zinit, fzf-tab, autosuggestions, syntax highlighting
 - tmux with custom configuration
 - vim with plugins (Vundle, themes, NERDTree, vim-airline)
 - Docker
@@ -63,6 +64,7 @@ id username
 
 ```bash
 ./install-tools.sh       # System development tools
+./setup-zsh.sh           # Zsh with Zinit and plugins
 ./install-tmux.sh        # tmux with configuration
 ./install-vim.sh         # vim with plugins
 ./install-docker.sh      # Docker Engine
@@ -76,4 +78,5 @@ id username
 ```bash
 ./setup-machine.sh --clean      # Stop services and remove configs
 ./setup-machine.sh --clean-all  # Completely uninstall everything
+./uninstall.sh                  # Interactive uninstaller for zsh, tmux, vim, docker
 ```

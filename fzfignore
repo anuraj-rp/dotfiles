@@ -1,0 +1,13 @@
+# FZF ignore patterns - one per line
+# Used by Ctrl+T and Alt+C in zsh
+
+.git
+node_modules
+__pycache__
+.venv
+.cache
+build
+dist
+.next
+target
+vendor

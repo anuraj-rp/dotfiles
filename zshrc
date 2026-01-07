@@ -29,6 +29,46 @@ zstyle ':fzf-tab:*' fzf-command fzf
 zstyle ':fzf-tab:*' single-group color
 zstyle ':fzf-tab:*' show-group full
 
+# FZF configuration
+export FZF_DEFAULT_OPTS='
+  --color=fg:#ebdbb2,bg:#282828,hl:#fabd2f
+  --color=fg+:#ebdbb2,bg+:#3c3836,hl+:#fabd2f
+  --color=info:#83a598,prompt:#bdae93,pointer:#fb4934
+  --color=marker:#fe8019,spinner:#b8bb26,header:#83a598
+  --height=40%
+  --layout=reverse
+  --border
+  --ansi
+'
+
+# Use ls with colors for file listing (Ctrl+T)
+export FZF_CTRL_T_OPTS="--preview 'ls -la --color=always {}' --preview-window=right:40%"
+
+# Use ls with colors for directory listing (Alt+C)
+export FZF_ALT_C_OPTS="--preview 'ls -la --color=always {}' --preview-window=right:40%"
+
+# FZF finder commands - uses fd/rg if available, falls back to find
+# Set FZF_FINDER=find to force using find instead of fd
+if [[ -z "$FZF_FINDER" ]]; then
+    if command -v fd &>/dev/null; then
+        FZF_FINDER="fd"
+    elif command -v fdfind &>/dev/null; then
+        FZF_FINDER="fdfind"
+    else
+        FZF_FINDER="find"
+    fi
+fi
+
+if [[ "$FZF_FINDER" == "fd" || "$FZF_FINDER" == "fdfind" ]]; then
+    # fd: fast, colored, respects .gitignore
+    export FZF_CTRL_T_COMMAND="$FZF_FINDER --color=always --hidden --exclude .git"
+    export FZF_ALT_C_COMMAND="$FZF_FINDER --type d --color=always --hidden --exclude .git"
+else
+    # find: fallback with manual ignore list
+    export FZF_CTRL_T_COMMAND='find . \( -name .git -o -name node_modules -o -name __pycache__ -o -name .venv -o -name .cache -o -name build -o -name dist -o -name .next -o -name target -o -name vendor \) -prune -o \( -type f -o -type d \) -print 2>/dev/null | sed "s|^\./||"'
+    export FZF_ALT_C_COMMAND='find . \( -name .git -o -name node_modules -o -name __pycache__ -o -name .venv -o -name .cache -o -name build -o -name dist -o -name .next -o -name target -o -name vendor \) -prune -o -type d -print 2>/dev/null | sed "s|^\./||"'
+fi
+
 # FZF keybindings (Ctrl+R for history, Ctrl+T for files, Alt+C for cd)
 if command -v fzf &>/dev/null; then
     if [[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]]; then
@@ -68,3 +108,13 @@ alias ls='ls --color=auto'
 alias ll='ls -lah --color=auto'
 alias la='ls -A --color=auto'
 alias grep='grep --color=auto'
+
+# Interactive ripgrep search with fzf (usage: rgi "pattern")
+rgi() {
+    rg --color=always --line-number --no-heading "$@" |
+        fzf --ansi \
+            --delimiter ':' \
+            --preview 'bat --color=always --highlight-line {2} {1} 2>/dev/null || head -100 {1}' \
+            --preview-window 'right:60%:+{2}-10' \
+            --bind 'enter:become(vim {1} +{2})'
+}
