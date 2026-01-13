@@ -51,10 +51,15 @@ truncate_to_repo = false
 # This removes the section header and all its key-value pairs until the next section or end of file
 sed -i '/^\[directory\.substitutions\]/,/^\[/{ /^\[directory\.substitutions\]/d; /^\[/!d; }' "$STARSHIP_CONFIG"
 
-# Disable username display (only show OS icon)
+# Configure username section (only show OS icon by default, add disabled setting for toggle_username function)
 sed -i '/^\[username\]/,/^\[/ {
     s/show_always = true/show_always = false/
 }' "$STARSHIP_CONFIG"
+
+# Add 'disabled = false' to [username] section if not present (required for toggle_username function)
+if ! sed -n '/^\[username\]/,/^\[/p' "$STARSHIP_CONFIG" | grep -q "disabled"; then
+    sed -i '/^\[username\]/a\disabled = false' "$STARSHIP_CONFIG"
+fi
 
 echo "✓ Directory paths configured to show first letter (e.g., ~/s/g/dotfiles)"
 echo "✓ Username display disabled (only OS icon will show)"
