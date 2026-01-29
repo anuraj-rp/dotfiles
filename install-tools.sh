@@ -31,8 +31,15 @@ if command -v brew &> /dev/null; then
     # build-essential equivalent (Xcode Command Line Tools)
     if ! xcode-select -p &> /dev/null; then
         echo "Installing Xcode Command Line Tools..."
-        xcode-select --install
-        echo "Note: You may need to complete the installation in the GUI prompt"
+        echo "Note: A GUI prompt will appear - please accept the installation"
+        xcode-select --install || true
+
+        # Wait for installation to complete
+        echo "Waiting for Xcode Command Line Tools installation to complete..."
+        until xcode-select --print-path &> /dev/null; do
+            sleep 4
+        done
+        echo "✓ Xcode Command Line Tools installation complete"
     else
         echo "✓ Xcode Command Line Tools already installed"
     fi
