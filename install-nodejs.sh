@@ -63,6 +63,23 @@ echo "Node.js Installer (via nvm)"
 echo "========================================"
 echo ""
 
+# Ensure nvm init lines are present in a shell config file
+add_nvm_to_shell_config() {
+    local config="$1"
+    if [ ! -f "$config" ]; then
+        return
+    fi
+    if grep -q 'export NVM_DIR' "$config"; then
+        return
+    fi
+    echo "" >> "$config"
+    echo '# NVM (Node Version Manager)' >> "$config"
+    echo 'export NVM_DIR="$HOME/.nvm"' >> "$config"
+    echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm' >> "$config"
+    echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> "$config"
+    echo "Added nvm to $config"
+}
+
 # Check if nvm is already installed
 if [ -d "$HOME/.nvm" ]; then
     echo "nvm is already installed at ~/.nvm"
@@ -87,6 +104,10 @@ else
 
     echo "✓ nvm installed successfully"
 fi
+
+# Ensure nvm is available in all shells (nvm installer only adds to bashrc)
+add_nvm_to_shell_config "$HOME/.bashrc"
+add_nvm_to_shell_config "$HOME/.zshrc"
 
 echo ""
 echo "Installing Node.js..."
@@ -152,7 +173,7 @@ if command -v pnpm &> /dev/null; then
 fi
 echo ""
 echo "Next steps:"
-echo "  1. Restart your shell (or run: source ~/.bashrc)"
+echo "  1. Restart your shell (or run: source ~/.bashrc / source ~/.zshrc)"
 echo "  2. Verify installation: node -v && pnpm -v"
 echo ""
 echo "Useful nvm commands:"
