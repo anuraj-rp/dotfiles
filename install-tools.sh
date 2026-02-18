@@ -76,6 +76,14 @@ if command -v brew &> /dev/null; then
         echo "✓ iproute2mac already installed"
     fi
 
+    # uv (Python package manager)
+    if ! command -v uv &> /dev/null; then
+        echo "Installing uv..."
+        brew install uv
+    else
+        echo "✓ uv already installed ($(uv --version))"
+    fi
+
     echo ""
     echo "Note: On macOS, python3 comes with venv built-in"
     echo "Note: 'python' command may not be aliased to 'python3' by default"
@@ -104,6 +112,14 @@ elif command -v apt &> /dev/null; then
 
     echo ""
     echo "✓ All packages installed successfully"
+
+    # uv (Python package manager)
+    if ! command -v uv &> /dev/null; then
+        echo "Installing uv..."
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+    else
+        echo "✓ uv already installed ($(uv --version))"
+    fi
 
 else
     echo "Error: Unsupported platform. This script supports Ubuntu and macOS only."
@@ -134,6 +150,7 @@ else
     echo "  - zip/unzip (archive utilities)"
     echo "  - fontconfig (font cache management)"
 fi
+echo "  - uv (Python package manager)"
 echo ""
 echo "Verify installations:"
 echo "  gcc --version"
@@ -142,3 +159,4 @@ echo "  python --version"
 echo "  python3 --version"
 echo "  git --version"
 echo "  ip --version"
+echo "  uv --version"
